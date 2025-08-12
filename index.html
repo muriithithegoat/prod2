@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daily — Minimal Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f7f8fb; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --accent-2:#06b6d4; --glass: rgba(2,6,23,0.04);
+      --radius:12px;
+    }
+    [data-theme="dark"]{
+      --bg:#071025; --card:#071328; --muted:#94a3b8; --accent:#7c3aed; --accent-2:#06b6d4; --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto; background:var(--bg); color:var(--text,#0b1220); -webkit-font-smoothing:antialiased}
+    .app{max-width:680px;margin:28px auto;padding:18px}
+    header{display:flex;align-items:center;gap:12px}
+    .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#02121a;font-weight:700}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:4px}
+    .top{display:flex;gap:12px;align-items:center;margin-top:18px}
+    .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 8px 30px rgba(2,6,23,0.06)}
+    .input-row{display:flex;gap:8px}
+    input,select{padding:12px;border-radius:10px;border:1px solid rgba(2,6,23,0.06);background:transparent;outline:none;font-size:14px;width:100%}
+    input:focus, select:focus{box-shadow:0 6px 20px rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.6)}
+    button.btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;box-shadow:0 8px 30px rgba(37,99,235,0.12)}
+    .muted{color:var(--muted);font-size:13px}
+    .flex{display:flex;align-items:center;gap:10px}
+    .list{margin-top:12px;display:flex;flex-direction:column;gap:10px;max-height:380px;overflow:auto;padding-right:6px}
+    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:var(--glass);transition:transform .18s ease,box-shadow .18s ease}
+    .item:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.06)}
+    .item .left{display:flex;gap:10px;align-items:center}
+    .avatar{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#02121a;font-weight:700}
+    .tiny{font-size:12px;color:var(--muted)}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .secondary{background:transparent;border:1px solid rgba(2,6,23,0.06);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .fab{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:999px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#02121a;font-weight:800;box-shadow:0 18px 40px rgba(37,99,235,0.12);border:0;cursor:pointer}
+    .small{font-size:13px}
+    .row-between{display:flex;justify-content:space-between;align-items:center}
+    /* subtle animations */
+    .fade-in{animation:fadeIn .45s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    /* responsive */
+    @media (max-width:520px){ .app{margin:12px;padding:12px} .top{flex-direction:column;align-items:stretch} .input-row{flex-direction:column} .avatar{width:36px;height:36px} }
+  </style>
+</head>
+<body>
+  <div class="app fade-in">
+    <header>
+      <div class="logo">DS</div>
+      <div>
+        <h1>Daily — Minimal Tracker</h1>
+        <div class="subtitle">Record small wins — reading, exercise, study</div>
+      </div>
+      <div style="margin-left:auto" class="flex">
+        <button id="exportBtn" class="secondary small">Export CSV</button>
+        <button id="themeBtn" class="secondary small" title="Toggle theme">🌓</button>
+      </div>
+    </header>
+
+    <div class="top">
+      <div class="card" style="flex:1">
+        <form id="form" onsubmit="return false" style="display:flex;flex-direction:column;gap:10px">
+          <div class="input-row">
+            <input id="name" placeholder="Activity (e.g., Reading, Jogging)" autocomplete="off" required>
+            <input id="minutes" type="number" min="1" placeholder="mins" style="width:110px">
+          </div>
+          <div class="row-between">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="date" type="date" style="width:150px">
+              <select id="category" style="width:150px">
+                <option>General</option><option>Reading</option><option>Exercise</option><option>Meditation</option><option>Study</option>
+              </select>
+            </div>
+            <div class="flex">
+              <button id="addBtn" class="btn">Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div style="width:200px" class="card">
+        <div class="row-between">
+          <div><div class="muted">Today</div><div id="todayDate" style="font-weight:700"></div></div>
+          <div style="text-align:right"><div class="muted small">Total</div><div id="totalMins" style="font-weight:800">0m</div></div>
+        </div>
+        <div style="margin-top:10px" class="tiny muted">Saved locally • works offline</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">Activities <span class="tiny muted" id="selDateLabel"></span></div>
+        <div class="muted tiny">Quick actions</div>
+      </div>
+
+      <div style="margin-top:10px" class="controls">
+        <button class="secondary small" id="quickRead">+ Read 30m</button>
+        <button class="secondary small" id="quickEx">+ Exercise 20m</button>
+        <button class="secondary small" id="clearDay">Clear Day</button>
+      </div>
+
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+
+  <button class="fab" id="fab" aria-label="Add quick">+</button>
+
+  <script>
+    // Utilities and state
+    const LS_KEY = 'daily_modern.activities.v1';
+    const $ = s => document.querySelector(s);
+    const todayISO = d => { const dt = d ? new Date(d) : new Date(); const y=dt.getFullYear(); const m=String(dt.getMonth()+1).padStart(2,'0'); const day=String(dt.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; };
+    const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString();
+
+    let activities = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+
+    // DOM refs
+    const nameIn = $('#name'), minsIn = $('#minutes'), dateIn = $('#date'), listWrap = $('#list'), totalMinsEl = $('#totalMins'), todayDateEl = $('#todayDate'), selDateLabel = $('#selDateLabel');
+    const themeBtn = $('#themeBtn'), exportBtn = $('#exportBtn');
+
+    // init
+    dateIn.value = todayISO();
+    todayDateEl.textContent = new Date().toLocaleDateString();
+    selDateLabel.textContent = '• ' + dateIn.value;
+
+    // theme
+    const savedTheme = localStorage.getItem('daily_modern.theme');
+    if(savedTheme === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    themeBtn.addEventListener('click', ()=>{
+      const cur = document.documentElement.getAttribute('data-theme');
+      if(cur === 'dark'){ document.documentElement.removeAttribute('data-theme'); localStorage.setItem('daily_modern.theme','light'); } else { document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('daily_modern.theme','dark'); }
+    });
+
+    // helpers
+    function save(){ localStorage.setItem(LS_KEY, JSON.stringify(activities)); }
+    function uid(){ return 'a'+Date.now()+Math.floor(Math.random()*9999); }
+    function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+    // render
+    function render(){
+      const sel = dateIn.value || todayISO();
+      selDateLabel.textContent = '• ' + sel;
+      const list = activities.filter(a => a.date === sel).sort((a,b)=>b.added - a.added);
+      listWrap.innerHTML = '';
+      let total = 0;
+      if(list.length === 0){ listWrap.innerHTML = '<div class="muted tiny" style="padding:10px">No activities for this day</div>'; }
+      for(const it of list){
+        total += Number(it.minutes||0);
+        const el = document.createElement('div'); el.className='item';
+        el.innerHTML = `
+          <div class="left">
+            <div class="avatar">${escapeHtml((it.name||'•').charAt(0).toUpperCase())}</div>
+            <div>
+              <div style="font-weight:700">${escapeHtml(it.name)}</div>
+              <div class="tiny muted">${escapeHtml(it.category||'General')} • ${it.minutes} min</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="secondary small" data-id="${it.id}" data-action="edit">Edit</button>
+            <button class="secondary small" data-id="${it.id}" data-action="del">Delete</button>
+          </div>
+        `;
+        listWrap.appendChild(el);
+      }
+      totalMinsEl.textContent = total + 'm';
+    }
+
+    // add
+    $('#addBtn').addEventListener('click', ()=>{
+      const name = nameIn.value.trim(); const minutes = Number(minsIn.value) || 0; const date = dateIn.value || todayISO();
+      const category = $('#category').value || 'General';
+      if(!name) return nameIn.focus();
+      const item = { id: uid(), name, minutes, date, category, added: Date.now() };
+      activities.push(item); save(); render(); nameIn.value=''; minsIn.value=''; nameIn.focus(); flashSaved();
+    });
+
+    // quick add buttons
+    $('#quickRead').addEventListener('click', ()=>{ activities.push({id:uid(),name:'Reading',minutes:30,date:dateIn.value||todayISO(),category:'Reading',added:Date.now()}); save(); render(); flashSaved(); });
+    $('#quickEx').addEventListener('click', ()=>{ activities.push({id:uid(),name:'Exercise',minutes:20,date:dateIn.value||todayISO(),category:'Exercise',added:Date.now()}); save(); render(); flashSaved(); });
+    $('#clearDay').addEventListener('click', ()=>{
+      if(!confirm('Clear all activities for ' + (dateIn.value||todayISO()) + '?')) return;
+      activities = activities.filter(a=>a.date !== (dateIn.value||todayISO())); save(); render();
+    });
+
+    // list actions (edit/delete)
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('[data-action]'); if(!btn) return;
+      const id = btn.dataset.id; const action = btn.dataset.action;
+      const idx = activities.findIndex(a=>a.id===id);
+      if(action === 'del'){ if(idx>-1){ activities.splice(idx,1); save(); render(); } }
+      if(action === 'edit'){ if(idx>-1){ const it = activities[idx]; nameIn.value=it.name; minsIn.value=it.minutes; dateIn.value=it.date; $('#category').value = it.category || 'General'; activities.splice(idx,1); save(); render(); nameIn.focus(); } }
+    });
+
+    // export CSV
+    exportBtn.addEventListener('click', ()=>{
+      const rows = [['date','name','minutes','category','added']].concat(activities.map(a=>[a.date,a.name,a.minutes,a.category,a.added]));
+      const csv = rows.map(r => r.map(c => '"'+String(c).replaceAll('"','""')+'"').join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='activities.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // fab quick focus
+    $('#fab').addEventListener('click', ()=>{ nameIn.focus(); nameIn.value=''; minsIn.value='15'; });
+
+    // date change
+    dateIn.addEventListener('change', ()=> render());
+
+    // initial load
+    render();
+
+    // tiny saved flash
+    function flashSaved(){ const n = document.createElement('div'); n.textContent='Saved'; n.style.position='fixed'; n.style.right='18px'; n.style.bottom='18px'; n.style.padding='8px 12px'; n.style.borderRadius='10px'; n.style.background='linear-gradient(90deg,var(--accent),var(--accent-2))'; n.style.color='#02121a'; n.style.fontWeight='700'; document.body.appendChild(n); setTimeout(()=>n.remove(),800); }
+
+    // register service worker
+    if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js').catch(()=>{}); }
+  </script>
+</body>
+</html>

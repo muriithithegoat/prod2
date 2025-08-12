@@ -1,0 +1,21 @@
+{
+  "name": "Daily \u2014 Minimal Tracker",
+  "short_name": "Daily",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "description": "Minimal productivity tracker for daily activities. Works offline.",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
